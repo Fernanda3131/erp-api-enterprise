@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "name": "erp-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Fernanda Leon",
+  "license": "ISC",
+  "description": "Backend de ERP ENTERPRISE SISTEM"
+}
