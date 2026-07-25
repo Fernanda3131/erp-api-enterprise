@@ -1,16 +1,18 @@
 {
-  "dependencies": {
-    "express": "^5.2.1"
-  },
   "name": "erp-api",
   "version": "1.0.0",
+  "description": "Backend de ERP ENTERPRISE SISTEM",
+  "type": "module",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node src/server.js"
+    "dev": "node src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "Fernanda Leon",
   "license": "ISC",
-  "description": "Backend de ERP ENTERPRISE SISTEM"
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mssql": "^12.7.0"
+  }
 }

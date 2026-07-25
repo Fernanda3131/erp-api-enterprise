@@ -1,9 +1,8 @@
-const express = require("express");
+import { Router } from "express";
+import getVendors from "../controllers/vendor.controller.js"; // 👈 Se corrigió la coma por punto
 
-const router = express.Router();
+const router = Router();
 
-router.get("/", (req, res)=> {
-    res.send("Lista de Proveedores");
-});
+router.get("/", getVendors);
 
-module.exports = router;
+export default router;
