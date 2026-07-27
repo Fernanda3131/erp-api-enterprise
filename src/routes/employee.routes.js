@@ -1,20 +1,22 @@
-// routes/employee.routes.js
 import { Router } from "express";
-import { getEmployees, createEmployee, deleteEmployee, getEmployeesId, UpdateEmployee } from "../controllers/employee.controller.js";
+import {
+    getEmployeesCont,
+    getEmployeeByIdCont,
+    createEmployeeCont,
+    updateEmployeeCont,
+    deleteEmployeeCont
+} from "../controllers/employee.controller.js";
 
 const router = Router();
 
-// 1. Obtener todos los empleados (GET)
-router.get("/", getEmployees);
+router.get("/", getEmployeesCont);
 
-router.get("/:id", getEmployeesId);
+router.get("/:id", getEmployeeByIdCont);
 
-// 2. Crear un nuevo empleado (POST)
-router.post("/", createEmployee);
+router.post("/", createEmployeeCont);
 
-router.put("/:id", UpdateEmployee)
+router.put("/:id", updateEmployeeCont);
 
-// 3. Eliminar un empleado por ID (DELETE)
-router.delete("/:id", deleteEmployee);
+router.delete("/:id", deleteEmployeeCont);
 
 export default router;

@@ -8,23 +8,31 @@ const dbSettings = {
     password: process.env.DB_PASSWORD,
     server: process.env.DB_SERVER,
     database: process.env.DB_DATABASE,
-    port: process.env.DB_PORT,
+    port: Number(process.env.DB_PORT) || 1433,
 
-    options = {
+    options: {
         encrypt: false,
-        trustServerCertificade: true
+        trustServerCertificate: true
     }
 };
 
 export async function getConnection() {
     try {
+
+        console.log("Intentando conectar...");
+
         const pool = await sql.connect(dbSettings);
-        console.log("CONEXION EXITOSA A SQL SERVER");
+
+        console.log("CONEXIÓN EXITOSA A SQL SERVER");
+
         return pool;
-    }catch(error) {
+
+    } catch (error) {
+
+        console.error("Error de conexión:");
         console.error(error);
+
     }
-    
 }
 
 export {sql};
