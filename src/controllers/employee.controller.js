@@ -5,55 +5,62 @@ import {
     updateEmployeeDB,
     deleteEmployeeDB
 } from "../models/employee.model.js";
+import { getPagination } from "../utils/pagination.js";
+import { successResponse, errorResponse } from "../utils/responses.js";
+
 export const getEmployeesCont = async (req, res) => {
     try {
-
-        const employees = await getEmployeesDB();
-
-        return res.status(200).json(employees);
-
+        const { page, limit, offset } = getPagination(req.query);
+        const { employees, total } = await getEmployeesDB(offset, limit);
+        const totalPages = Math.ceil(total / limit);
+        return successResponse(
+            res,
+            employees,
+            "Empleados obtenidos correctamente.",
+            200,
+            {
+                page,
+                limit,
+                total,
+                totalPages
+            }
+        );
     } catch (error) {
-
         console.error(error);
-
-        return res.status(500).json({
-            message: "Error al obtener los empleados"
-        });
-
+        return errorResponse(
+            res,
+            "Error al obtener los empleados."
+        );
     }
 };
+
 export const getEmployeeByIdCont = async (req, res) => {
-
     try {
-
-        const { id } = req.params;
-
+        const { id } = req.params
         const employee = await getEmployeeByIdDB(id);
-
         if (!employee) {
-            return res.status(404).json({
-                message: "Empleado no encontrado"
-            });
+            return errorResponse(
+                res,
+                "Empleado no encontrado.",
+                404
+            );
         }
-
-        return res.status(200).json(employee);
-
+        return successResponse(
+            res,
+            employee,
+            "Empleado obtenido correctamente."
+        );
     } catch (error) {
-
         console.error(error);
-
-        return res.status(500).json({
-            message: "Error al obtener el empleado"
-        });
-
+        return errorResponse(
+            res,
+            "Error al obtener el empleado."
+        );
     }
-
 };
 
 export const createEmployeeCont = async (req, res) => {
-
     try {
-
         const {
             name,
             last_name,
@@ -62,8 +69,21 @@ export const createEmployeeCont = async (req, res) => {
             address,
             position
         } = req.body;
-
-        await createEmployeeDB(
+        if (
+            !name ||
+            !last_name ||
+            !document ||
+            !phone ||
+            !address ||
+            !position
+        ) {
+            return errorResponse(
+                res,
+                "Todos los campos son obligatorios.",
+                400
+            );
+        }
+        const newEmployee = await createEmployeeDB(
             name,
             last_name,
             document,
@@ -72,27 +92,34 @@ export const createEmployeeCont = async (req, res) => {
             position
         );
 
-        return res.status(201).json({
-            message: "Empleado creado correctamente"
-        });
+        if (!newEmployee) {
+            return errorResponse(
+                res,
+                "El número de documento ya se encuentra registrado.",
+                409
+            );
+        }
+        return successResponse(
+            res,
+            null,
+            "Empleado creado correctamente.",
+            201
+        );
 
     } catch (error) {
-
         console.error(error);
-
-        return res.status(500).json({
-            message: "Error al crear el empleado"
-        });
+        return errorResponse(
+            res,
+            "Error interno del servidor."
+        );
 
     }
 
 };
+
 export const updateEmployeeCont = async (req, res) => {
-
     try {
-
         const { id } = req.params;
-
         const {
             name,
             last_name,
@@ -102,7 +129,17 @@ export const updateEmployeeCont = async (req, res) => {
             position
         } = req.body;
 
-        await updateEmployeeDB(
+        const employee = await getEmployeeByIdDB(id);
+
+        if (!employee) {
+            return errorResponse(
+                res,
+                "Empleado no encontrado.",
+                404
+            );
+        }
+
+        const updatedEmployee = await updateEmployeeDB(
             id,
             name,
             last_name,
@@ -112,26 +149,48 @@ export const updateEmployeeCont = async (req, res) => {
             position
         );
 
-        return res.status(200).json({
-            message: "Empleado actualizado correctamente"
-        });
+        if (!updatedEmployee) {
+            return errorResponse(
+                res,
+                "El número de documento ya pertenece a otro empleado.",
+                409
+            );
+        }
+
+        return successResponse(
+            res,
+            null,
+            "Empleado actualizado correctamente."
+        );
 
     } catch (error) {
 
         console.error(error);
 
-        return res.status(500).json({
-            message: "Error al actualizar el empleado"
-        });
+        return errorResponse(
+            res,
+            "Error al actualizar el empleado."
+        );
 
     }
 
 };
+
 export const deleteEmployeeCont = async (req, res) => {
 
     try {
 
         const { id } = req.params;
+
+        const employee = await getEmployeeByIdDB(id);
+
+        if (!employee) {
+            return errorResponse(
+                res,
+                "Empleado no encontrado.",
+                404
+            );
+        }
 
         await deleteEmployeeDB(id);
 
@@ -141,9 +200,10 @@ export const deleteEmployeeCont = async (req, res) => {
 
         console.error(error);
 
-        return res.status(500).json({
-            message: "Error al eliminar el empleado"
-        });
+        return errorResponse(
+            res,
+            "Error al eliminar el empleado."
+        );
 
     }
 

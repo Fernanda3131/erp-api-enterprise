@@ -4,10 +4,17 @@ export const getEmployeesDB = async () => {
 
     const result = await pool.request().query(`
         SELECT *
-        FROM Employees
+        FROM Employees ORDER BY id OFFSET @offset ROWS
+        FETCH NEXT @limit ROWS ONLY;
     `);
 
-    return result.recordset;
+    const totalResult = await pool.request().query(`
+        SELECT COUNT(*) AS total FROM Employees;`)
+
+    return {
+        employees: result.recordset,
+        total: totalResult.recordset[0].total
+    }
 };
 export const getEmployeeByIdDB = async (id) => {
     const pool = await getConnection();
@@ -32,10 +39,18 @@ export const createEmployeeDB = async (
     address,
     position
 ) => {
-
     const pool = await getConnection();
 
-    await pool
+    const employee = await pool
+        .request()
+        .input("document", sql.VarChar, document)
+        .query(`SELECT id FROM Employees WHERE document = @document`);
+
+    if (employee.recordset && employee.recordset.length > 0) {
+        return null;
+    }
+
+    const result = await pool
         .request()
         .input("name", sql.VarChar, name)
         .input("last_name", sql.VarChar, last_name)
@@ -44,26 +59,11 @@ export const createEmployeeDB = async (
         .input("address", sql.VarChar, address)
         .input("position", sql.VarChar, position)
         .query(`
-            INSERT INTO Employees
-            (
-                name,
-                last_name,
-                document,
-                phone,
-                address,
-                position
-            )
-            VALUES
-            (
-                @name,
-                @last_name,
-                @document,
-                @phone,
-                @address,
-                @position
-            )
+            INSERT INTO Employees (name, last_name, document, phone, address, position)
+            VALUES (@name, @last_name, @document, @phone, @address, @position)
         `);
 
+    return result;
 };
 
 export const updateEmployeeDB = async (
@@ -75,10 +75,17 @@ export const updateEmployeeDB = async (
     address,
     position
 ) => {
-
     const pool = await getConnection();
+    const employee = await pool
+        .request()
+        .input("document", sql.VarChar, document)
+        .input("id", sql.Int, id)
+        .query(`SELECT id FROM Employees WHERE document = @document AND id != @id`);
 
-    await pool
+    if (employee.recordset && employee.recordset.length > 0) {
+        return null;
+    }
+    const result = await pool
         .request()
         .input("id", sql.Int, id)
         .input("name", sql.VarChar, name)
@@ -99,6 +106,7 @@ export const updateEmployeeDB = async (
             WHERE id = @id
         `);
 
+    return result;
 };
 
 export const deleteEmployeeDB = async (id) => {
