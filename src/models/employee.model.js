@@ -1,20 +1,32 @@
 import { getConnection, sql } from "../config/database.js";
-export const getEmployeesDB = async () => {
+export const getEmployeesDB = async (offset, limit) => {
+
     const pool = await getConnection();
 
-    const result = await pool.request().query(`
-        SELECT *
-        FROM Employees ORDER BY id OFFSET @offset ROWS
-        FETCH NEXT @limit ROWS ONLY;
-    `);
+    const result = await pool
+        .request()
+        .input("offset", sql.Int, offset)
+        .input("limit", sql.Int, limit)
+        .query(`
+            SELECT *
+            FROM Employees
+            ORDER BY id
+            OFFSET @offset ROWS
+            FETCH NEXT @limit ROWS ONLY;
+        `);
 
-    const totalResult = await pool.request().query(`
-        SELECT COUNT(*) AS total FROM Employees;`)
+    const totalResult = await pool
+        .request()
+        .query(`
+            SELECT COUNT(*) AS total
+            FROM Employees;
+        `);
 
     return {
         employees: result.recordset,
         total: totalResult.recordset[0].total
-    }
+    };
+
 };
 export const getEmployeeByIdDB = async (id) => {
     const pool = await getConnection();
