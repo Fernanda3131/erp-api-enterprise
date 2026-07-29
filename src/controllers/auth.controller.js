@@ -1,5 +1,6 @@
 import { loginDB } from "../models/auth.model.js";
 import { generateToken } from "../utils/jwt.js";
+import { comparePassword } from "../utils/bycript.js";
 
 export const loginCont = async (req, res) => {
 
@@ -17,7 +18,10 @@ export const loginCont = async (req, res) => {
                 message: "Usuario no encontrado."
             });
         }
-        if (password !== user.password) {
+        const validPassword = await comparePassword(password, user.password);
+
+
+        if (!validPassword) {
             return res.status(401).json({
                 message: "Contraseña incorrecta."
             });

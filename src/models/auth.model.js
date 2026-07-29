@@ -1,4 +1,4 @@
-import { getConnection, sql } from "../config/database";
+import { getConnection, sql } from "../config/database.js";
 
 export const loginDB = async (email) => {
     const pool = await getConnection();
