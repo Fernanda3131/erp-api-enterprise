@@ -1,11 +1,31 @@
-import { findUserDB, registerDB, loginDB } from "../models/auth.model.js";
+import {
+    findUserDB,
+    registerDB,
+    loginDB
+} from "../models/auth.model.js";
+
+import {
+    hashPassword,
+    comparePassword
+} from "../utils/bcrypt.js";
+
 import { generateToken } from "../utils/jwt.js";
-import { comparePassword } from "../utils/bcrypt.js";
-import { errorResponse, successResponse } from "../utils/responses.js";
+
+import {
+    errorResponse,
+    successResponse
+} from "../utils/responses.js";
+
+
+import { getUserPermissionsDB } from "../models/permission.model.js";
+
 
 export const registerCont = async (req, res) => {
+
     try {
-        const { name,
+
+        const {
+            name,
             email,
             password,
             idRol
@@ -18,81 +38,133 @@ export const registerCont = async (req, res) => {
         ) {
             return errorResponse(
                 res,
-                "Todo los campos son obligatorios",
+                "Todos los campos son obligatorios.",
                 400
             );
-            const existingUser = await findUserDB(email);
-            if (existingUser) {
-                return errorResponse(
-                    res,
-                    "El correo ya esta registrado",
-                    409
-                );
-            }
-            const hashedPassword = await hashPassword(password);
+        }
+        const existingUser = await findUserDB(email);
 
-            await createUserDB(
-                name, email, hashedPassword, idRol
-            );
-            return successResponse(
+        if (existingUser) {
+
+            return errorResponse(
                 res,
-                null,
-                "Registro exitoso",
-                201
+                "El correo ya está registrado.",
+                409
             );
         }
-    } catch(error) {
-        console.log(error);
+        const hashedPassword = await hashPassword(password);
+        await registerDB(
+            name,
+            email,
+            hashedPassword,
+            idRol
+        );
+        return successResponse(
+            res,
+            null,
+            "Registro exitoso.",
+            201
+        );
+
+    } catch (error) {
+        console.error(error);
         return errorResponse(
             res,
-            "Error interno del servidor",
+            "Error interno del servidor.",
+            500
         );
     }
-}
+};
+
 
 export const loginCont = async (req, res) => {
-
     try {
-
-        const { email, password } = req.body;
-
+        const {
+            email,
+            password
+        } = req.body;
         if (!email || !password) {
-            return res.status(400).json({
-                message: "Email y contraseña son obligatorios."
-            });
+
+            return errorResponse(
+                res,
+                "Email y contraseña son obligatorios.",
+                400
+            );
+
         }
         const user = await loginDB(email);
-
         if (!user) {
-            return res.status(404).json({
-                message: "Usuario no encontrado."
-            });
+
+            return errorResponse(
+                res,
+                "Usuario no encontrado.",
+                404
+            );
+
         }
         const validPassword = await comparePassword(
             password,
             user.password
         );
-
         if (!validPassword) {
-            return res.status(401).json({
-                message: "Contraseña incorrecta."
-            });
+
+            return errorResponse(
+                res,
+                "Credenciales incorrectas.",
+                401
+            );
+
         }
         const token = generateToken(user);
+        const permissions = await getUserPermissionsDB(
+            user.idRol
+        );
 
-        return res.status(200).json({
-            message: "Login exitoso.",
-            token
-        });
+        return successResponse(
+            res,
+            {
+                token,
+                user: {
+                    id: user.id,
+                    name: user.name, 
+                    email: user.email,
+                    role: user.idRol,
+                    permissions
+                }
+            },
+            "Login exitoso.",
+            200
+        );
 
     } catch (error) {
 
         console.error(error);
 
-        return res.status(500).json({
-            message: "Error interno del servidor."
-        });
+        return errorResponse(
+            res,
+            "Error interno del servidor.",
+            500
+        );
 
     }
 
 };
+
+
+export const getMeCont = async (req, res) => {
+    try {
+        const permissions = await getUserPermissionsDB(
+            req.user.role
+        );
+        return res.status(200).json({
+            user: req.user,
+            permissions
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Error al obtener la información del usuario"
+        });
+
+    };
+}

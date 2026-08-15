@@ -7,16 +7,17 @@ import {
     deleteEmployeeCont
 } from "../controllers/employee.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
+import { authorize } from "../middlewares/role.middleware.js";
 const router = Router();
 
-router.get("/", verifyToken, getEmployeesCont);
+router.get("/", verifyToken, authorize("employees.read"),  getEmployeesCont);
 
-router.get("/:id", verifyToken, getEmployeeByIdCont);
+router.get("/:id", verifyToken, authorize("employees.read"), getEmployeeByIdCont);
 
-router.post("/", verifyToken, createEmployeeCont);
+router.post("/", verifyToken, authorize("employees.create"), createEmployeeCont);
 
-router.put("/:id",verifyToken, updateEmployeeCont);
+router.put("/:id",verifyToken, authorize("employees.update"), updateEmployeeCont);
 
-router.delete("/:id", verifyToken, deleteEmployeeCont);
+router.delete("/:id", verifyToken, authorize("employees.delete"), deleteEmployeeCont);
 
 export default router;

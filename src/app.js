@@ -1,17 +1,25 @@
 import express from "express";
+import cors from "cors";
+
 import employeeRoutes from "./routes/employee.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import { loggerMiddleware } from "./middlewares/logger.middleware.js";
 
 const app = express();
+app.use(cors({
+    origin: "http://localhost:4200",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
-// Middleware para procesar JSON
+
 app.use(express.json());
-import { loggerMiddleware } from "./middlewares/logger.middleware.js";
+
 app.use(loggerMiddleware);
 
-// Definición de rutas
 app.use("/employees", employeeRoutes);
 
 app.use("/api/auth", authRoutes);
+
 
 export default app;

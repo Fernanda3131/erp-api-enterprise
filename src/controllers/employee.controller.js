@@ -5,14 +5,40 @@ import {
     updateEmployeeDB,
     deleteEmployeeDB
 } from "../models/employee.model.js";
+
 import { getPagination } from "../utils/pagination.js";
-import { successResponse, errorResponse } from "../utils/responses.js";
+
+import {
+    successResponse,
+    errorResponse
+} from "../utils/responses.js";
+
 
 export const getEmployeesCont = async (req, res) => {
+
     try {
-        const { page, limit, offset } = getPagination(req.query);
-        const { employees, total } = await getEmployeesDB(offset, limit);
-        const totalPages = Math.ceil(total / limit);
+
+        const {
+            page,
+            limit,
+            offset
+        } = getPagination(req.query);
+
+
+        const {
+            employees,
+            total
+        } = await getEmployeesDB(
+            offset,
+            limit
+        );
+
+
+        const totalPages = Math.ceil(
+            total / limit
+        );
+
+
         return successResponse(
             res,
             employees,
@@ -25,42 +51,66 @@ export const getEmployeesCont = async (req, res) => {
                 totalPages
             }
         );
+
     } catch (error) {
+
         console.error(error);
+
         return errorResponse(
             res,
             "Error al obtener los empleados."
         );
+
     }
+
 };
 
+
 export const getEmployeeByIdCont = async (req, res) => {
+
     try {
-        const { id } = req.params
+
+        const { id } = req.params;
+
+
         const employee = await getEmployeeByIdDB(id);
+
+
         if (!employee) {
+
             return errorResponse(
                 res,
                 "Empleado no encontrado.",
                 404
             );
+
         }
+
+
         return successResponse(
             res,
             employee,
             "Empleado obtenido correctamente."
         );
+
     } catch (error) {
+
         console.error(error);
+
         return errorResponse(
             res,
             "Error al obtener el empleado."
         );
+
     }
+
 };
 
+
 export const createEmployeeCont = async (req, res) => {
+
     try {
+
         const {
             name,
             last_name,
@@ -69,6 +119,8 @@ export const createEmployeeCont = async (req, res) => {
             address,
             position
         } = req.body;
+
+
         if (
             !name ||
             !last_name ||
@@ -77,12 +129,16 @@ export const createEmployeeCont = async (req, res) => {
             !address ||
             !position
         ) {
+
             return errorResponse(
                 res,
                 "Todos los campos son obligatorios.",
                 400
             );
+
         }
+
+
         const newEmployee = await createEmployeeDB(
             name,
             last_name,
@@ -92,13 +148,18 @@ export const createEmployeeCont = async (req, res) => {
             position
         );
 
+
         if (!newEmployee) {
+
             return errorResponse(
                 res,
                 "El número de documento ya se encuentra registrado.",
                 409
             );
+
         }
+
+
         return successResponse(
             res,
             null,
@@ -107,19 +168,27 @@ export const createEmployeeCont = async (req, res) => {
         );
 
     } catch (error) {
+
         console.error(error);
+
         return errorResponse(
             res,
-            "Error interno del servidor."
+            "Error interno del servidor.",
+            500
         );
 
     }
 
 };
 
+
 export const updateEmployeeCont = async (req, res) => {
+
     try {
+
         const { id } = req.params;
+
+
         const {
             name,
             last_name,
@@ -129,15 +198,38 @@ export const updateEmployeeCont = async (req, res) => {
             position
         } = req.body;
 
+
+        if (
+            !name ||
+            !last_name ||
+            !document ||
+            !phone ||
+            !address ||
+            !position
+        ) {
+
+            return errorResponse(
+                res,
+                "Todos los campos son obligatorios.",
+                400
+            );
+
+        }
+
+
         const employee = await getEmployeeByIdDB(id);
 
+
         if (!employee) {
+
             return errorResponse(
                 res,
                 "Empleado no encontrado.",
                 404
             );
+
         }
+
 
         const updatedEmployee = await updateEmployeeDB(
             id,
@@ -149,13 +241,17 @@ export const updateEmployeeCont = async (req, res) => {
             position
         );
 
+
         if (!updatedEmployee) {
+
             return errorResponse(
                 res,
                 "El número de documento ya pertenece a otro empleado.",
                 409
             );
+
         }
+
 
         return successResponse(
             res,
@@ -169,12 +265,14 @@ export const updateEmployeeCont = async (req, res) => {
 
         return errorResponse(
             res,
-            "Error al actualizar el empleado."
+            "Error al actualizar el empleado.",
+            500
         );
 
     }
 
 };
+
 
 export const deleteEmployeeCont = async (req, res) => {
 
@@ -182,17 +280,23 @@ export const deleteEmployeeCont = async (req, res) => {
 
         const { id } = req.params;
 
+
         const employee = await getEmployeeByIdDB(id);
 
+
         if (!employee) {
+
             return errorResponse(
                 res,
                 "Empleado no encontrado.",
                 404
             );
+
         }
 
+
         await deleteEmployeeDB(id);
+
 
         return res.status(204).send();
 
@@ -202,7 +306,8 @@ export const deleteEmployeeCont = async (req, res) => {
 
         return errorResponse(
             res,
-            "Error al eliminar el empleado."
+            "Error al eliminar el empleado.",
+            500
         );
 
     }
