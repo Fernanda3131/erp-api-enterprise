@@ -10,14 +10,14 @@ import { verifyToken } from "../middlewares/auth.middleware.js";
 import { authorize } from "../middlewares/role.middleware.js";
 const router = Router();
 
-router.get("/", verifyToken, authorize("employees.read"),  getEmployeesCont);
+router.get("/", verifyToken, authorize("employees.read"), getEmployeesCont);
 
 router.get("/:id", verifyToken, authorize("employees.read"), getEmployeeByIdCont);
 
-router.post("/", verifyToken, authorize("employees.create"), createEmployeeCont);
+router.post("/", verifyToken, authorize("employees.read"), createEmployeeCont);
 
-router.put("/:id",verifyToken, authorize("employees.update"), updateEmployeeCont);
+router.put("/:id", verifyToken, authorize("employees.read"), updateEmployeeCont);
 
-router.delete("/:id", verifyToken, authorize("employees.delete"), deleteEmployeeCont);
+router.delete("/:id", verifyToken, authorize("employees.read"), deleteEmployeeCont);
 
 export default router;

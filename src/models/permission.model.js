@@ -1,7 +1,7 @@
 import { getConnection, sql } from "../config/database.js";
 
 export const rolePermissionDB = async (idRol, permissionName) => {
-    const pool = getConnection();
+    const pool = await getConnection();
 
     const result = await pool.request()
         .input("IdRol", sql.Int, idRol)

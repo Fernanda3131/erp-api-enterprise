@@ -17,7 +17,7 @@ app.use(express.json());
 
 app.use(loggerMiddleware);
 
-app.use("/employees", employeeRoutes);
+app.use("/api/employees", employeeRoutes);
 
 app.use("/api/auth", authRoutes);
 
